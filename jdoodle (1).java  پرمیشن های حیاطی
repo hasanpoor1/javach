@@ -1,0 +1,69 @@
+package com.example.criticalpermissions;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+public class MainActivity extends AppCompatActivity {
+
+    private static final int LOCATION_PERMISSION_CODE = 1;
+
+    private TextView permissionStatus;
+    private Button requestPermissionButton;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {                   // دسترسی موقعیت مکانی از کاربر
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        permissionStatus = findViewById(R.id.permissionStatus);
+        requestPermissionButton = findViewById(R.id.requestPermissionButton);
+
+        checkPermissionStatus();
+
+        requestPermissionButton.setOnClickListener(v -> requestLocationPermission());
+    }
+                  // این کد برسی میکند ایا قبلا توسط   کابر داده شده است یا خیر
+    private void checkPermissionStatus() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            permissionStatus.setText("Permission Granted. Thank you for trusting us!");
+        } else {
+            permissionStatus.setText("Location permission is not granted. Please allow access for accurate functionality.");
+        }
+    }
+
+    private void requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Permission already granted!", Toast.LENGTH_SHORT).show();
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                Toast.makeText(this, "Location permission is necessary for this app to work effectively. Please allow access.", Toast.LENGTH_LONG).show();
+            }
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
+        }              //و اگر دسترسی به موقیثت مکانی داده نشده باشد این خط کد با نمایش پیام درخواست میدهد
+        
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);  //وقتی کاربر اجازه دسترسی یا رد میدهد این متد اجرامیشود
+
+        if (requestCode == LOCATION_PERMISSION_CODE) {   
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                permissionStatus.setText("Permission Granted. Thank you for trusting us!");
+                Toast.makeText(this, "Location permission granted.", Toast.LENGTH_SHORT).show();
+            } else {
+                permissionStatus.setText("Permission Denied. Some features may not work as intended.");
+                Toast.makeText(this, "Permission denied. Please enable it from settings.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+}
